@@ -1,0 +1,85 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socket.IO Message Example</title>
+  <script src="https://cdn.socket.io/4.1.2/socket.io.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    .output {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: scroll;
+    }
+    .output p {
+      margin: 5px 0;
+    }
+    .file-input {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Socket.IO Message Example</h1>
+  <div class="output" id="output">
+    <p>WebSocket output will appear here...</p>
+  </div>
+
+  <!-- File upload form (unchanged from previous example) -->
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="file" id="fileInput" required>
+    <button type="submit">Upload File</button>
+  </form>
+
+  <hr>
+
+  <script>
+
+    // Handle form submission (unchanged from previous example)
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const formData = new FormData();
+      formData.append('file', document.getElementById('fileInput').files[0]);
+
+      fetch('http://localhost:3000/file/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        console.log('Response from server:', data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+
+    const socket = io('http://localhost:3000');
+
+    socket.on('readingLine', ({ line }) => {
+      appendMessage(`File line: ${line}`);
+    });
+
+    function appendMessage(message) {
+      const outputDiv = document.getElementById('output');
+      const p = document.createElement('p');
+      p.textContent = message;
+      outputDiv.appendChild(p);
+      outputDiv.scrollTop = outputDiv.scrollHeight;
+    }
+  </script>
+</body>
+</html>
